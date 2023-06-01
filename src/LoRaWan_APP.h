@@ -82,7 +82,7 @@ public:
   void ifskipjoin();
   void generateDeveuiByChipID();
 
-#if defined(LORA_DISPLAY)
+#if defined(WIFI_LoRa_32_V3)||defined(WIFI_LoRa_32_V2)
   void displayJoining();
   void displayJoined();
   void displaySending();

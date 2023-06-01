@@ -1,5 +1,5 @@
 #include <LoRaWan_APP.h>
-#include "Arduino.h"
+#include <Arduino.h>
 
 #if(LoraWan_RGB==1)
 #include "CubeCell_NeoPixel.h"
@@ -18,7 +18,7 @@ CubeCell_NeoPixel pixels(1, RGB, NEO_GRB + NEO_KHZ800);
 
 
 
-#if defined(LORA_DISPLAY)
+#if defined(WIFI_LoRa_32_V3)||defined(WIFI_LoRa_32_V2)||defined(WIFI_LoRa_32)
 #include <Wire.h>  
 #include "HT_SSD1306Wire.h"
 
@@ -250,7 +250,7 @@ static void McpsIndication( McpsIndication_t *mcpsIndication )
 	{
 		return;
 	}
-#if defined(LORA_DISPLAY)
+#if defined(WIFI_LoRa_32_V3)||defined(WIFI_LoRa_32_V2)
 	ifDisplayAck=1;
 	revrssi=mcpsIndication->Rssi;
 	revsnr=mcpsIndication->Snr;
@@ -337,7 +337,7 @@ static void MlmeConfirm( MlmeConfirm_t *mlmeConfirm )
 			if( mlmeConfirm->Status == LORAMAC_EVENT_INFO_STATUS_OK )
 			{
 
-#if defined(LORA_DISPLAY)
+#if defined(WIFI_LoRa_32_V3)||defined(WIFI_LoRa_32_V2)
 				if(isDispayOn)
 				{
 					LoRaWAN.displayJoined();
@@ -725,7 +725,7 @@ void LoRaWanClass::ifskipjoin()
 }
 #endif
 
-#if defined(LORA_DISPLAY)
+#if defined( WIFI_LoRa_32_V3 )||defined( WIFI_LoRa_32_V2 )
 void LoRaWanClass::displayJoining()
 {
 	display.setFont(ArialMT_Plain_16);

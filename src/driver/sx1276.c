@@ -22,8 +22,7 @@
  *
  * \author    Wael Guibene ( Semtech )
  */
-#include "Arduino.h"
-#if defined(WIFI_LoRa_32)||defined(WIFI_LoRa_32_V2)||defined(Wireless_Stick)||defined(Wireless_Stick_Lite)||defined(wireless_bridge)
+ #if defined(WIFI_LoRa_32)||defined(WIFI_LoRa_32_V2)||defined(wireless_stick)||defined(wireless_stick_lite)||defined(wireless_bridge)
 #include <math.h>
 #include <string.h>
 #include "../loramac/utilities.h"
@@ -32,8 +31,7 @@
 #include "../driver/delay.h"
 #include "../driver/sx1276-board.h"
 #include "../driver/debug.h"
-extern void lora_printf(const char *format, ...);
-extern uint8_t SpiInOut(Spi_t *obj, uint8_t outData );
+extern  void lora_printf(const char *format, ...);
 
 
 /*!

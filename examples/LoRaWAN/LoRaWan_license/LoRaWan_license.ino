@@ -1,16 +1,16 @@
 #include "LoRaWan_APP.h"
-
+uint32_t license[4]={0x3D6699E0, 0xA2C6CB8B, 0x48C94611, 0xEC6F9A41};
 /* OTAA para*/
 uint8_t devEui[] = { 0x22, 0x32, 0x33, 0x00, 0x00, 0x88, 0x88, 0x02 };
 uint8_t appEui[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-uint8_t appKey[] = { 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x66, 0x01 };
+uint8_t appKey[] = { 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88 };
 
 /* ABP para*/
 uint8_t nwkSKey[] = { 0x15, 0xb1, 0xd0, 0xef, 0xa4, 0x63, 0xdf, 0xbe, 0x3d, 0x11, 0x18, 0x1e, 0x1e, 0xc7, 0xda,0x85 };
 uint8_t appSKey[] = { 0xd7, 0x2c, 0x78, 0x75, 0x8c, 0xdc, 0xca, 0xbf, 0x55, 0xee, 0x4a, 0x77, 0x8d, 0x16, 0xef,0x67 };
 uint32_t devAddr =  ( uint32_t )0x007e6ae1;
 
-/*LoraWan channelsmask*/
+/*LoraWan channelsmask, default channels 0-7*/ 
 uint16_t userChannelsMask[6]={ 0x00FF,0x0000,0x0000,0x0000,0x0000,0x0000 };
 
 /*LoraWan region, select in arduino IDE tools*/
@@ -27,7 +27,6 @@ bool overTheAirActivation = true;
 
 /*ADR enable*/
 bool loraWanAdr = true;
-
 
 /* Indicates if the node is sending confirmed or unconfirmed messages */
 bool isTxConfirmed = true;
@@ -59,13 +58,13 @@ uint8_t confirmedNbTrials = 4;
 /* Prepares the payload of the frame */
 static void prepareTxFrame( uint8_t port )
 {
-	/*appData size is LORAWAN_APP_DATA_MAX_SIZE which is defined in "commissioning.h".
-	*appDataSize max value is LORAWAN_APP_DATA_MAX_SIZE.
-	*if enabled AT, don't modify LORAWAN_APP_DATA_MAX_SIZE, it may cause system hanging or failure.
-	*if disabled AT, LORAWAN_APP_DATA_MAX_SIZE can be modified, the max value is reference to lorawan region and SF.
-	*for example, if use REGION_CN470, 
-	*the max value for different DR can be found in MaxPayloadOfDatarateCN470 refer to DataratesCN470 and BandwidthsCN470 in "RegionCN470.h".
-	*/
+  /*appData size is LORAWAN_APP_DATA_MAX_SIZE which is defined in "commissioning.h".
+  *appDataSize max value is LORAWAN_APP_DATA_MAX_SIZE.
+  *if enabled AT, don't modify LORAWAN_APP_DATA_MAX_SIZE, it may cause system hanging or failure.
+  *if disabled AT, LORAWAN_APP_DATA_MAX_SIZE can be modified, the max value is reference to lorawan region and SF.
+  *for example, if use REGION_CN470, 
+  *the max value for different DR can be found in MaxPayloadOfDatarateCN470 refer to DataratesCN470 and BandwidthsCN470 in "RegionCN470.h".
+  */
     appDataSize = 4;
     appData[0] = 0x00;
     appData[1] = 0x01;
@@ -73,63 +72,57 @@ static void prepareTxFrame( uint8_t port )
     appData[3] = 0x03;
 }
 
-RTC_DATA_ATTR bool firstrun = true;
+//if true, next uplink will add MOTE_MAC_DEVICE_TIME_REQ 
+
 
 void setup() {
-	Serial.begin(115200);
+  Serial.begin(115200);
+  Mcu.setlicense(license);
   Mcu.begin();
-  if(firstrun)
-  {
-    LoRaWAN.displayMcuInit();
-    firstrun = false;
-  }
-	deviceState = DEVICE_STATE_INIT;
+  deviceState = DEVICE_STATE_INIT;
 }
 
 void loop()
 {
-	switch( deviceState )
-	{
-		case DEVICE_STATE_INIT:
-		{
+  switch( deviceState )
+  {
+    case DEVICE_STATE_INIT:
+    {
 #if(LORAWAN_DEVEUI_AUTO)
-			LoRaWAN.generateDeveuiByChipID();
+      LoRaWAN.generateDeveuiByChipID();
 #endif
-			LoRaWAN.init(loraWanClass,loraWanRegion);
-			break;
-		}
-		case DEVICE_STATE_JOIN:
-		{
-      LoRaWAN.displayJoining();
-			LoRaWAN.join();
-			break;
-		}
-		case DEVICE_STATE_SEND:
-		{
-      LoRaWAN.displaySending();
-			prepareTxFrame( appPort );
-			LoRaWAN.send();
-			deviceState = DEVICE_STATE_CYCLE;
-			break;
-		}
-		case DEVICE_STATE_CYCLE:
-		{
-			// Schedule next packet transmission
-			txDutyCycleTime = appTxDutyCycle + randr( 0, APP_TX_DUTYCYCLE_RND );
-			LoRaWAN.cycle(txDutyCycleTime);
-			deviceState = DEVICE_STATE_SLEEP;
-			break;
-		}
-		case DEVICE_STATE_SLEEP:
-		{
-      LoRaWAN.displayAck();
-			LoRaWAN.sleep(loraWanClass);
-			break;
-		}
-		default:
-		{
-			deviceState = DEVICE_STATE_INIT;
-			break;
-		}
-	}
+      LoRaWAN.init(loraWanClass,loraWanRegion);
+      break;
+    }
+    case DEVICE_STATE_JOIN:
+    {
+      LoRaWAN.join();
+      break;
+    }
+    case DEVICE_STATE_SEND:
+    {
+      prepareTxFrame( appPort );
+      LoRaWAN.send();
+      deviceState = DEVICE_STATE_CYCLE;
+      break;
+    }
+    case DEVICE_STATE_CYCLE:
+    {
+      // Schedule next packet transmission
+      txDutyCycleTime = appTxDutyCycle + randr( -APP_TX_DUTYCYCLE_RND, APP_TX_DUTYCYCLE_RND );
+      LoRaWAN.cycle(txDutyCycleTime);
+      deviceState = DEVICE_STATE_SLEEP;
+      break;
+    }
+    case DEVICE_STATE_SLEEP:
+    {
+      LoRaWAN.sleep(loraWanClass);
+      break;
+    }
+    default:
+    {
+      deviceState = DEVICE_STATE_INIT;
+      break;
+    }
+  }
 }
