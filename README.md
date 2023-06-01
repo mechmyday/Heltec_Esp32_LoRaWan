@@ -1,3 +1,6 @@
+## Note: This is a fork of Emanuele Iannone's repo.  I have just updated it to the most recent version published by Heltec.
+https://github.com/Heltec-Aaron-Lee/WiFi_Kit_series/tree/master/esp32/libraries/LoraWan102
+
 # Heltec Esp32 LoRaWan library
 This is a Platformio library for Heltec ESP32 boards with integrated LoRa transceivers.
 The code is directly ported from the original Heltec Arduino library: https://github.com/Heltec-Aaron-Lee/WiFi_Kit_series
